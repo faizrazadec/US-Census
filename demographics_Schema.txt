@@ -1,0 +1,233 @@
+Table Name: demographics
+Table Description: This table contains detailed demographic, economic, and workforce-related information for various geographic regions. It provides insights into population demographics, employment distribution, income statistics, and commute methods, enabling in-depth analysis of social and economic patterns.
+Columns: Following are the coloumns of the Table Name demographics.
+1. Column: TractId
+   Type: STRING
+   Mode: REQUIRED
+   Description: A unique alphanumeric identifier assigned to each geographic tract for census and demographic analysis.
+
+2. Column: State
+   Type: STRING
+   Mode: REQUIRED
+   Description: The name of the state where the tract is located, helping to classify data by region.
+
+3. Column: County
+   Type: STRING
+   Mode: REQUIRED
+   Description: The name of the county within the state, providing a more granular level of location information.
+
+4. Column: TotalPop
+   Type: INTEGER
+   Mode: REQUIRED
+   Description: The total number of people residing in the geographic tract.
+
+5. Column: Men
+   Type: INTEGER
+   Mode: REQUIRED
+   Description: The number of male residents in the total population of the tract.
+
+6. Column: Women
+   Type: INTEGER
+   Mode: REQUIRED
+   Description: The number of female residents in the total population of the tract.
+
+7. Column: Hispanic
+   Type: FLOAT64
+   Mode: REQUIRED
+   Description: The percentage of the population that identifies as Hispanic, calculated from the total population.
+
+8. Column: White
+   Type: FLOAT64
+   Mode: REQUIRED
+   Description: The percentage of the population that identifies as White, reflecting racial demographics.
+
+9. Column: Black
+   Type: FLOAT64
+   Mode: REQUIRED
+   Description: The percentage of the population that identifies as Black or African American.
+
+10. Column: Native
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of the population that identifies as Native American or Alaskan Native.
+
+11. Column: Asian
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of the population that identifies as Asian.
+
+12. Column: Pacific
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of the population that identifies as Native Hawaiian or Pacific Islander.
+
+13. Column: VotingAgeCitizen
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The total number of citizens in the tract who are of voting age (18 years and older).
+
+14. Column: Income
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The median household income in the tract, measured in US dollars, representing economic well-being.
+
+15. Column: IncomeErr
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The margin of error for the median household income, providing a measure of statistical confidence.
+
+16. Column: IncomePerCap
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The per capita income in the tract, calculated as the total income divided by the population.
+
+17. Column: IncomePerCapErr
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The margin of error for the per capita income value, ensuring accuracy in reporting.
+
+18. Column: Poverty
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of individuals in the tract living below the poverty line, indicating socio-economic challenges.
+
+19. Column: ChildPoverty
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of children under 18 years old living below the poverty line.
+
+20. Column: Professional
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in professional or technical occupations.
+
+21. Column: Service
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in service industries, such as retail or hospitality.
+
+22. Column: Office
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in office-based jobs, including administrative roles.
+
+23. Column: Construction
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in the construction industry, encompassing various trades.
+
+24. Column: Production
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in production or manufacturing roles.
+
+25. Column: Drive
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals commuting to work by driving alone in a private vehicle.
+
+26. Column: Carpool
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals commuting to work by carpooling.
+
+27. Column: Transit
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals commuting to work using public transportation.
+
+28. Column: Walk
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals commuting to work by walking.
+
+29. Column: OtherTransp
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals using alternative modes of transportation, such as bicycles or motorcycles.
+
+30. Column: WorkAtHome
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working from home instead of commuting.
+
+31. Column: MeanCommute
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The average time, in minutes, that workers take to commute to their place of employment.
+
+32. Column: Employed
+    Type: INTEGER
+    Mode: REQUIRED
+    Description: The total number of employed individuals in the tract's workforce.
+
+33. Column: PrivateWork
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in private-sector organizations.
+
+34. Column: PublicWork
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in public-sector or government roles.
+
+35. Column: SelfEmployed
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals who are self-employed or operate their own businesses.
+
+36. Column: FamilyWork
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The percentage of employed individuals working in family-owned businesses or farms.
+
+37. Column: Unemployment
+    Type: FLOAT64
+    Mode: REQUIRED
+    Description: The unemployment rate in the tract, representing the percentage of the workforce actively seeking but unable to find employment.
+
+Data Definition Language (DDL):
+`CREATE TABLE demographics (
+    TractId STRING NOT NULL,
+    State STRING NOT NULL,
+    County STRING NOT NULL,
+    TotalPop INTEGER NOT NULL,
+    Men INTEGER NOT NULL,
+    Women INTEGER NOT NULL,
+    Hispanic FLOAT64 NOT NULL,
+    White FLOAT64 NOT NULL,
+    Black FLOAT64 NOT NULL,
+    Native FLOAT64 NOT NULL,
+    Asian FLOAT64 NOT NULL,
+    Pacific FLOAT64 NOT NULL,
+    VotingAgeCitizen INTEGER NOT NULL,
+    Income INTEGER NOT NULL,
+    IncomeErr INTEGER NOT NULL,
+    IncomePerCap INTEGER NOT NULL,
+    IncomePerCapErr INTEGER NOT NULL,
+    Poverty FLOAT64 NOT NULL,
+    ChildPoverty FLOAT64 NOT NULL,
+    Professional FLOAT64 NOT NULL,
+    Service FLOAT64 NOT NULL,
+    Office FLOAT64 NOT NULL,
+    Construction FLOAT64 NOT NULL,
+    Production FLOAT64 NOT NULL,
+    Drive FLOAT64 NOT NULL,
+    Carpool FLOAT64 NOT NULL,
+    Transit FLOAT64 NOT NULL,
+    Walk FLOAT64 NOT NULL,
+    OtherTransp FLOAT64 NOT NULL,
+    WorkAtHome FLOAT64 NOT NULL,
+    MeanCommute FLOAT64 NOT NULL,
+    Employed INTEGER NOT NULL,
+    PrivateWork FLOAT64 NOT NULL,
+    PublicWork FLOAT64 NOT NULL,
+    SelfEmployed FLOAT64 NOT NULL,
+    FamilyWork FLOAT64 NOT NULL,
+    Unemployment FLOAT64 NOT NULL
+);`
+
+
+CensusTrack
+TYPE;FULLCODE;STATE;COUNTY;TRACT;SHEETS
+TRACT;01001020100;01;001;201.00;1
