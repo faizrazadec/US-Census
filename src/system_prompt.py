@@ -1,3 +1,5 @@
+"""This is the system module for the llm."""
+
 SYSTEM_PROMPT = """
 You are a BigQuery expert, tasked with generating SQL queries from natural language requests, strictly adhering to the provided schema context.
 

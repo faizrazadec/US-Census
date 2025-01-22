@@ -1,8 +1,14 @@
+"""
+This module contains functions for generating SQL queries or refining user input in 
+natural language based on schema information stored in a Chroma vector store. The module 
+uses a large language model (LLM) to process the user input and interact with the schema 
+context, providing either a valid SQL query or refined natural language prompts if the 
+query cannot be processed.
+"""
+
 from langchain_core.messages import SystemMessage, HumanMessage
-from SystemPrompt import SYSTEM_PROMPT
-from langchain_core.messages import SystemMessage, HumanMessage
-from SystemPrompt import SYSTEM_PROMPT
-from logger import setup_logger
+from src.system_prompt import SYSTEM_PROMPT
+from src.logger import setup_logger
 
 # Get the configured logger
 logger = setup_logger()
@@ -22,7 +28,9 @@ def generate_initial_response(user_input, llm, vector_store, k):
         context = "\n".join(flattened_context)
 
         # Initial system prompt and message
-        system_message = SystemMessage(content=f"{SYSTEM_PROMPT}\nSchema Context:\n{context}")
+        system_message = SystemMessage(
+            content=f"{SYSTEM_PROMPT}\nSchema Context:\n{context}"
+        )
         human_message = HumanMessage(content=user_input)
 
         # Generate initial response
@@ -37,7 +45,10 @@ def generate_initial_response(user_input, llm, vector_store, k):
     except Exception as e:
         logger.error("Error generating response...")
         print(f"Error generating response: {e}")
-        return "An error occurred while processing your request. Please try again later."
+        return (
+            "An error occurred while processing your request. Please try again later."
+        )
+
 
 def trigger_fallback_logic(user_input, llm, context, human_message):
     """Trigger the fallback logic when the initial response cannot generate a SQL query."""
@@ -81,7 +92,7 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
         - You are strictly bound not to **Suggested SQL Query:**
         - You are strictly bound not to return Improved SQL (based on Refined Prompt)
         """
-        
+
         # Use fallback system prompt
         refined_system_message = SystemMessage(content=SYSTEM_PROMPT_2)
         refined_response = llm.invoke([refined_system_message, human_message])
@@ -90,7 +101,7 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
         logger.info("Improved Prompts Generated.")
         # print("Refined Response generated:")
         # print(refined_response.content.strip())
-        
+
         # Return refined response (this means no further processing or BigQuery execution)
         logger.critical("TERMINATED")
         return refined_response.content.strip()
@@ -99,7 +110,8 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
         print(f"Error triggering fallback logic: {e}")
         logger.error("Error triggering fallback logic.")
         return "An error occurred while processing the fallback logic. Please try again later."
-    
+
+
 def get_response(user_input, llm, vector_store, k):
     """Main function to get response and handle fallback logic if needed."""
     try:
@@ -107,7 +119,10 @@ def get_response(user_input, llm, vector_store, k):
         # Generate initial response
         response = generate_initial_response(user_input, llm, vector_store, k)
 
-        if "I cannot generate a SQL query for this request based on the provided schema." in response:
+        if (
+            "I cannot generate a SQL query for this request based on the provided schema."
+            in response
+        ):
             # If the response indicates fallback is needed, trigger fallback logic
             # print("Fallback triggered.")
             logger.info("Fallback triggered")
@@ -116,8 +131,10 @@ def get_response(user_input, llm, vector_store, k):
             flattened_context = [item.page_content for item in results]
             context = "\n".join(flattened_context)
             # Call the fallback logic
-            return trigger_fallback_logic(user_input, llm, context, HumanMessage(content=user_input))
-        
+            return trigger_fallback_logic(
+                user_input, llm, context, HumanMessage(content=user_input)
+            )
+
         logger.critical("TERMINATED")
         # Return the initial response if successful (i.e., SQL query generation)
         return response
@@ -126,4 +143,6 @@ def get_response(user_input, llm, vector_store, k):
         print(f"Error in get_response: {e}")
         logger.error("An error occurred while processing your request")
         logger.critical("TERMINATED")
-        return "An error occurred while processing your request. Please try again later."
+        return (
+            "An error occurred while processing your request. Please try again later."
+        )

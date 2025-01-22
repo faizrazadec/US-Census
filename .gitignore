@@ -1,10 +1,7 @@
+src/__pycache__
 __pycache__
 .env
-chroma_langchain_db/
 llm-testing-447813-e0db393f4a53.json
 *.html
-*.png
 *.json
-Chroma_db/
-test_*.py
-testing*.py
+retriver.py

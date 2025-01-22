@@ -1,11 +1,160 @@
+import os
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_chroma import Chroma
+from system_prompt import SYSTEM_PROMPT
+from big_query_manager import BigQueryManager
+import regex as re
 import pandas as pd
 import altair as alt
-import regex as re
 from logger import setup_logger
 
+# Load environment variables
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Get the configured logger
 logger = setup_logger()
 
+PROJECT_ID = os.getenv('PROJECT_ID')
+DATASET_ID = os.getenv("DATASET_ID")
+bq_manager = BigQueryManager(project_id=PROJECT_ID, dataset_id=DATASET_ID)
+
+# Initialize the embedding model
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=GEMINI_API_KEY,
+    task_type="retrieval_document"
+)
+# Initialize the LLM model
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-pro",
+    api_key=GEMINI_API_KEY
+)
+# Initialize the Chroma vector store (assumed to be stored in './chroma_langchain_db')
+vector_store = Chroma(
+    collection_name="Demographics_Schema_Collection",
+    embedding_function=embeddings,
+    persist_directory="./Chroma_db"  # Path where Chroma DB is persisted
+)
+
+def generate_initial_response(user_input, llm, vector_store, k):
+    """Generate the initial response from the LLM based on user input and schema context."""
+    try:
+        logger.info("Function generate_initial_response.")
+        # Retrieve relevant schema information from ChromaDB
+        results = vector_store.similarity_search(user_input, k=k)
+
+        # Flatten the list of results to extract content
+        flattened_context = [item.page_content for item in results]
+
+        # Concatenate retrieved schema context
+        context = "\n".join(flattened_context)
+
+        # Initial system prompt and message
+        system_message = SystemMessage(content=f"{SYSTEM_PROMPT}\nSchema Context:\n{context}")
+        human_message = HumanMessage(content=user_input)
+
+        # Generate initial response
+        response = llm.invoke([system_message, human_message])
+
+        # Debugging output
+        # print("Initial Response generated:")
+        # print(response.content.strip())
+
+        return response.content.strip()
+    except Exception as e:
+        logger.error("Error generating response...")
+        print(f"Error generating response: {e}")
+        return "An error occurred while processing your request. Please try again later."
+
+def trigger_fallback_logic(user_input, llm, context, human_message):
+    """Trigger the fallback logic when the initial response cannot generate a SQL query."""
+    try:
+        logger.info("Fallback Logic triggering...")
+        print("Triggering fallback logic")
+
+        # Fallback system prompt
+        SYSTEM_PROMPT_2 = f"""
+        You are an assistant tasked with refining natural language queries for better SQL generation. 
+
+        **IMPORTANT INSTRUCTIONS:**
+        1. **You are strictly bounded NOT to generate or include any SQL queries under any circumstances.**
+        2. Your task is to:
+        - Explain why the user's original query could not generate a valid SQL query.
+        - You are strictly bound to return at least 3 refined natural language prompts that address the issues in the original query.
+        3. Your response must strictly contain:
+        - A short explanation of why the original query failed.
+        - Refined natural language prompts, formatted as bullet points.
+        4. **Do NOT explain how to write SQL queries.**
+        5. **Do NOT mention SQL query structures, examples, or any SQL-related code in your response.**
+
+        **Here is the user's query that needs refinement:**  
+        {user_input}
+
+        **Schema Context:**  
+        {context}
+
+        **Response Format:**
+        1. **Why the Query Failed:**  
+        - [Brief explanation of failure]
+
+        2. **Refined Prompts:**  
+        - Refined Prompt 1: [First refined query]  
+        - Refined Prompt 2: [Second refined query]  
+        - Refined Prompt 3: [Third refined query]  
+
+        **Strict Reminder:**  
+        - You are strictly bound NOT to generate or include SQL queries in your response.
+        - You are strictly bound NOT to NOT discuss SQL syntax, query examples, or anything related to SQL query writing.
+        - You are strictly bound not to **Suggested SQL Query:**
+        - You are strictly bound not to return Improved SQL (based on Refined Prompt)
+        """
+        
+        # Use fallback system prompt
+        refined_system_message = SystemMessage(content=SYSTEM_PROMPT_2)
+        refined_response = llm.invoke([refined_system_message, human_message])
+
+        # Debugging output
+        print("Refined Response generated:")
+        print(refined_response.content.strip())
+        
+        # Return refined response (this means no further processing or BigQuery execution)
+        return refined_response.content.strip()
+
+    except Exception as e:
+        print(f"Error triggering fallback logic: {e}")
+        logger.error("Error triggering fallback logic.")
+        return "An error occurred while processing the fallback logic. Please try again later."
+    
+def get_response(user_input, llm, vector_store, k):
+    """Main function to get response and handle fallback logic if needed."""
+    try:
+        logger.info("Function get_response...")
+        # Generate initial response
+        response = generate_initial_response(user_input, llm, vector_store, k)
+
+        if "I cannot generate a SQL query for this request based on the provided schema." in response:
+            # If the response indicates fallback is needed, trigger fallback logic
+            # print("Fallback triggered.")
+            logger.info("Fallback triggered...")
+            # Retrieve schema context from ChromaDB again to pass to the fallback logic
+            results = vector_store.similarity_search(user_input, k=k)
+            flattened_context = [item.page_content for item in results]
+            context = "\n".join(flattened_context)
+            # Call the fallback logic
+            return trigger_fallback_logic(user_input, llm, context, HumanMessage(content=user_input))
+        
+        logger.critical("TERMINATED")
+        # Return the initial response if successful (i.e., SQL query generation)
+        return response
+
+    except Exception as e:
+        print(f"Error in get_response: {e}")
+        logger.error("An error occurred while processing your request")
+        logger.critical("TERMINATED")
+        return "An error occurred while processing your request. Please try again later."
+    
 def refine_response(response):
     try:
         logger.info("Refining Resonse...")
@@ -26,11 +175,9 @@ def get_data(bq_manager, reg):
         # Execute the BigQuery query
         logger.info("Hitting BigQuery...")
         data = bq_manager.execute_query(reg)
-        return data
-    except Exception as e:
-        logger.error(f"SQL Query Problem: {e}")
-        logger.critical("TERMINATED")
-    return None
+    except:
+        logger.error("SQL Query Problem.")
+    return data
 
 def preprocess_data(data: pd.DataFrame):
     logger.info("Preporcessing Data...")
@@ -226,6 +373,8 @@ def short_data(data:pd.DataFrame, user_input, llm):
     )
     # Save chart
     chart.save('average_work_from_home_percentage_by_state_bar_chart.json')
+    
+    image {{path}}
 
     ### Your Task:
     - Given the dataset: {data_json}
@@ -235,7 +384,7 @@ def short_data(data:pd.DataFrame, user_input, llm):
 
     # Call LLM to get a refined response based on the dataset and user query
     result = llm.invoke(system_prompt)
-    return result.content.strip(), data_json
+    return result.content.strip()
 
 def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10):
     """
@@ -500,6 +649,8 @@ def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10
     )
     # Save chart
     chart.save('average_work_from_home_percentage_by_state_bar_chart.json')
+    
+    image {{path}}
 
     ### Your Task:
     - Given the dataset filename: {json_filename}
@@ -510,7 +661,7 @@ def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10
 
     # Call LLM to get a refined response based on the dataset and user query
     result = llm.invoke(system_prompt)
-    return result.content.strip(), preprocessed_data
+    return result.content.strip()
 
 def process_llm_response(response_text, data):
     logger.info("Function process_llm_response")
@@ -574,17 +725,17 @@ def data_handle(data, user_input, llm, filename='data.json', rows=10):
 
     if data_rows > 100:
         logger.info("Function called for large dataset")
-        response, preprocessed_data = large_data(data, user_input, llm, filename='data.json', rows=10)
+        response = large_data(data, user_input, llm, filename='data.json', rows=10)
 
-        response_text, chart = process_llm_response(response, preprocessed_data)
+        response_text, chart = process_llm_response(response, data)
 
         return data_rows, response_text, chart
     
     elif data_rows <= 100:
         logger.info("Function Called for short dataset")
-        response, data_json = short_data(data, user_input, llm)
+        response = short_data(data, user_input, llm)
 
-        response_text, chart = process_llm_response(response, data_json)
+        response_text, chart = process_llm_response(response, data)
 
         return data_rows, response_text, chart
 
@@ -826,3 +977,46 @@ def data_handler(data: pd.DataFrame, user_input, llm, filename='data.json', rows
             response_text += f"\nError generating visualization: {str(e)}"
     
     return response_text, chart
+
+# Example usage
+if __name__ == "__main__":
+    user_query = "Find the top 5 counties with the highest percentage of self-employed individuals and show their average income."
+    
+    try:
+        logger.info("Generating SQL query...")
+        initial_response = generate_initial_response(user_query, llm, vector_store, k=1)
+        logger.info("Initial Response from LLM:")
+        # logger.info(initial_response)
+
+        if re.search(r"cannot generate.*SQL", initial_response, re.IGNORECASE):
+            logger.info("Fallback triggered.")
+            fallback_response = trigger_fallback_logic(user_query, llm, "", HumanMessage(content=user_query))
+            logger.info("Fallback Response:")
+            logger.info(fallback_response)
+        else:
+            refined_response = refine_response(initial_response)
+            logger.info("Refined SQL Query:")
+            logger.info(refined_response)
+
+            data = get_data(bq_manager, refined_response)
+            logger.info("Data retrieved from BigQuery:")
+            # logger.info(data.head())
+
+            if isinstance(data, pd.DataFrame) and not data.empty:
+                filename = save_json(data, 'data.json')
+                logger.info(f"Data saved to {filename}")
+                data_preview = preprocess_data(data)
+                logger.info("Data Preview Sent to LLM:")
+                logger.info(data_preview)
+
+                summary, chart = data_handle(data, user_query, llm, filename='data.json', rows=10)
+                logger.info("Data Summary:")
+                logger.info(summary)
+
+                if chart:
+                    chart.save('chart_output.png')
+                    logger.info("Chart saved as chart_output.png")
+            else:
+                logger.warning("No relevant data found.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
