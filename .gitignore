@@ -6,3 +6,5 @@ llm-testing-447813-e0db393f4a53.json
 *.png
 *.json
 Chroma_db/
+test_*.py
+testing*.py
