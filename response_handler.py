@@ -94,7 +94,7 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
 
     except Exception as e:
         print(f"Error triggering fallback logic: {e}")
-        logger.warning("Error triggering fallback logic.")
+        logger.error("Error triggering fallback logic.")
         return "An error occurred while processing the fallback logic. Please try again later."
     
 def get_response(user_input, llm, vector_store, k):
