@@ -46,8 +46,10 @@ if __name__ == "__main__":
 
     # Example: Run a query to create or fetch data
     query = """
-    SELECT d.County, d.Drive, d.Transit, d.Walk, d.OtherTransp FROM llm-testing-447813.us_census.demographics AS d ORDER BY d.TotalPop DESC LIMIT 3;
-    """
+    SELECT d.County, AVG(d.Income) AS AverageIncome
+FROM llm-testing-447813.us_census.demographics AS d
+ORDER BY d.SelfEmployed DESC
+LIMIT 5;"""
     data = bq_manager.execute_query(query)
     print(data)
     print(type(data))

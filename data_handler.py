@@ -2,7 +2,6 @@ import pandas as pd
 import altair as alt
 import regex as re
 from logger import setup_logger
-path = 'image.png'
 
 # Get the configured logger
 logger = setup_logger()
@@ -30,6 +29,7 @@ def get_data(bq_manager, reg):
         return data
     except Exception as e:
         logger.error(f"SQL Query Problem: {e}")
+        logger.critical("TERMINATED")
     return None
 
 def preprocess_data(data: pd.DataFrame):
@@ -226,8 +226,6 @@ def short_data(data:pd.DataFrame, user_input, llm):
     )
     # Save chart
     chart.save('average_work_from_home_percentage_by_state_bar_chart.json')
-    
-    image {{path}}
 
     ### Your Task:
     - Given the dataset: {data_json}
@@ -502,8 +500,6 @@ def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10
     )
     # Save chart
     chart.save('average_work_from_home_percentage_by_state_bar_chart.json')
-    
-    image {{path}}
 
     ### Your Task:
     - Given the dataset filename: {json_filename}

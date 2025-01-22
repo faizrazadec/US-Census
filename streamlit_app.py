@@ -8,7 +8,7 @@ import pandas as pd
 
 async def main():
     # Configure the page
-    st.set_page_config(page_title="SQL Query Generator", page_icon="🔍", layout="wide")
+    st.set_page_config(page_title="DIVS", page_icon="🔍", layout="wide")
     
     # Application title and description
     st.title("Intelligent Data Insights and Visualization System")

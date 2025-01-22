@@ -31,6 +31,7 @@ def generate_initial_response(user_input, llm, vector_store, k):
         # Debugging output
         # print("Initial Response generated:")
         # print(response.content.strip())
+        logger.info(response.content.strip())
 
         return response.content.strip()
     except Exception as e:

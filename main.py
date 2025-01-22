@@ -28,7 +28,7 @@ embeddings = GoogleGenerativeAIEmbeddings(
 )
 # Initialize the LLM model
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-1.5-pro",
     api_key=GEMINI_API_KEY
 )
 # Initialize the Chroma vector store (assumed to be stored in './chroma_langchain_db')
