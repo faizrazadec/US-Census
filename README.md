@@ -72,7 +72,7 @@ streamlit run app.py
 ```
 
 # 🏛️ Project Flow Diagram
-![Alt text](data/flow_diagram.png)
+![flow diagram](data/flow_diagram.png)
 
 # 📊 Usage Guide
 
@@ -83,4 +83,4 @@ streamlit run app.py
 
 - View results as an interactive table and chart.
 
-![Alt text](data/usage_example.png)
+![usage example](data/usage_example.png)
