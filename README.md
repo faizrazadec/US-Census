@@ -76,8 +76,7 @@ streamlit run app.py
 
 # 📊 Usage Guide
 
-- Enter a natural language query, e.g.,
-- "Show me the total sales for Q1 2024."
+- Enter a natural language query, e.g., "Show me the total sales for Q1 2024."
 
 - Submit the query to generate an SQL statement.
 
