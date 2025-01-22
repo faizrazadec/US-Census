@@ -2,7 +2,7 @@ import streamlit as st
 import asyncio
 from components import initialize_components
 from response_handler import generate_initial_response, trigger_fallback_logic
-from data_handler import refine_response, get_data, data_handler
+from data_handler import refine_response, get_data, data_handle, data_handler
 from langchain_core.messages import HumanMessage
 import pandas as pd
 
@@ -66,38 +66,40 @@ async def main():
                         # progress_bar = st.progress(st.session_state.progress)
                         # Step 1: Get initial response from LLM
                         initial_response = generate_initial_response(user_query, llm, vector_store, k=5)
-                        st.write("Initial Response from LLM:")
-                        st.write(initial_response)
+                        # st.write("Initial Response from LLM:")
+                        # st.write(initial_response)
                         # st.session_state.progress += 20 # Increase the progress by 10%
                         # progress_bar.progress(st.session_state.progress) #update the progress bar
                 
                         # Step 2: Check if initial response indicates fallback is needed
                         if "I cannot generate a SQL query for this request based on the provided schema." in initial_response:
-                            st.write("Fallback response generated.")
+                            # st.write("Fallback response generated.")
                             fallback_response = trigger_fallback_logic(user_query, llm, "", HumanMessage(content=user_query))
                             # st.session_state.progress += 80 # Increase the progress by 10%
                             # progress_bar.progress(st.session_state.progress) #update the progress bar
-                            st.write("Fallback Response:")
+                            # st.write("Fallback Response:")
                             st.write(fallback_response)
                         else:
                             # Step 3: Refine the response to remove backticks if any
                             refined_response = refine_response(initial_response)
-                            st.write("Refined Response:")
-                            st.write(refined_response)
+                            # st.write("Refined Response:")
+                            # st.write(refined_response)
                             # st.session_state.progress += 20 # Increase the progress by 10%
                             # progress_bar.progress(st.session_state.progress) #update the progress bar
                             
                             # Step 4: Get data from BigQuery
                             data = get_data(bq_manager, refined_response)
-                            st.write("Data retrieved from BigQuery:")
-                            st.write(data)
+                            # st.write("Data retrieved from BigQuery:")
+                            # st.write(data)
                             # st.session_state.progress += 20 # Increase the progress by 10%
                             # progress_bar.progress(st.session_state.progress) #update the progress bar
                             
                             # Step 5: Handle and summarize the data
                             if isinstance(data, pd.DataFrame) and not data.empty:
-                                summary_text, chart = data_handler(data, user_query, llm)
+                                data_rows, summary_text, chart = data_handle(data, user_query, llm, filename='data.json', rows=10)
+                                # st.write(data_rows)
                                 if summary_text:
+                                    # st.write(preprocessed_data)
 
                                     st.write("Data Summary:")
                                     with st.expander("Click to view the Data Summary", expanded=True):

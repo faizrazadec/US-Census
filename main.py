@@ -24,7 +24,7 @@ embeddings = GoogleGenerativeAIEmbeddings(
 )
 # Initialize the LLM model
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-pro",
+    model="gemini-1.5-flash",
     api_key=GEMINI_API_KEY
 )
 # Initialize the Chroma vector store (assumed to be stored in './chroma_langchain_db')
@@ -162,7 +162,7 @@ def get_data(bq_manager, reg):
 
 def data_handler(data: pd.DataFrame, user_input, llm):
     # Convert DataFrame to JSON (simplified)
-    data_json = data.to_json(orient='records', lines=False)
+    data_json = data.to_json(orient='records', lines=False, indent = 4)
 
     # New and improved system prompt
     improved_prompt = f"""
@@ -241,7 +241,7 @@ def data_handler(data: pd.DataFrame, user_input, llm):
 
 # Example usage
 if __name__ == "__main__":
-    user_query = "Visualize the racial distribution (White, Black, Asian, Hispanic) for New York."
+    user_query = "count the total number of rows in the  data"
     
     # Step 1: Get initial response from LLM (generate SQL query or error message)
     initial_response = generate_initial_response(user_query, llm, vector_store, k = 1)
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         print("Fallback response generated.")
         # Trigger fallback logic if SQL generation is not possible
         fallback_response = trigger_fallback_logic(user_query, llm, "", HumanMessage(content=user_query))
-        # print("Fallback Response:")
+        print("Fallback Response:")
         print(fallback_response)
     else:
         # print("SQL query generated:")
@@ -262,13 +262,14 @@ if __name__ == "__main__":
         # Step 3: Refine the response to remove backticks if any
         refined_response = refine_response(initial_response)
         print("Refined Response:")
-        print(refined_response)
+        # print(refined_response)
 
         # Step 4: Get data from BigQuery (based on the refined response, which is the SQL query)
         data = get_data(bq_manager, refined_response)
         print("Data retrieved from BigQuery:")
-        print(data)
-
+        # print(data)
+        data_json = data.tail(10).to_json(orient='records', lines=False)
+        print(data_json)
         # df = preprocess_data(data)
         # print(df)
 

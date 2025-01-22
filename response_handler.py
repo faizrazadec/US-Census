@@ -2,10 +2,16 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from SystemPrompt import SYSTEM_PROMPT
 from langchain_core.messages import SystemMessage, HumanMessage
 from SystemPrompt import SYSTEM_PROMPT
+from logger import setup_logger
+
+# Get the configured logger
+logger = setup_logger()
+
 
 def generate_initial_response(user_input, llm, vector_store, k):
     """Generate the initial response from the LLM based on user input and schema context."""
     try:
+        logger.info("Function generate_initial_response.")
         # Retrieve relevant schema information from ChromaDB
         results = vector_store.similarity_search(user_input, k=k)
 
@@ -28,12 +34,14 @@ def generate_initial_response(user_input, llm, vector_store, k):
 
         return response.content.strip()
     except Exception as e:
+        logger.error("Error generating response...")
         print(f"Error generating response: {e}")
         return "An error occurred while processing your request. Please try again later."
 
 def trigger_fallback_logic(user_input, llm, context, human_message):
     """Trigger the fallback logic when the initial response cannot generate a SQL query."""
     try:
+        logger.info("Fallback Logic triggering...")
         print("Triggering fallback logic")
 
         # Fallback system prompt
@@ -86,17 +94,20 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
 
     except Exception as e:
         print(f"Error triggering fallback logic: {e}")
+        logger.warning("Error triggering fallback logic.")
         return "An error occurred while processing the fallback logic. Please try again later."
     
 def get_response(user_input, llm, vector_store, k):
     """Main function to get response and handle fallback logic if needed."""
     try:
+        logger.info("Function get_response...")
         # Generate initial response
         response = generate_initial_response(user_input, llm, vector_store, k)
 
         if "I cannot generate a SQL query for this request based on the provided schema." in response:
             # If the response indicates fallback is needed, trigger fallback logic
-            print("Fallback triggered.")
+            # print("Fallback triggered.")
+            logger.info("Fallback triggered...")
             # Retrieve schema context from ChromaDB again to pass to the fallback logic
             results = vector_store.similarity_search(user_input, k=k)
             flattened_context = [item.page_content for item in results]
@@ -104,9 +115,12 @@ def get_response(user_input, llm, vector_store, k):
             # Call the fallback logic
             return trigger_fallback_logic(user_input, llm, context, HumanMessage(content=user_input))
         
+        logger.critical("TERMINATED")
         # Return the initial response if successful (i.e., SQL query generation)
         return response
 
     except Exception as e:
         print(f"Error in get_response: {e}")
+        logger.error("An error occurred while processing your request")
+        logger.critical("TERMINATED")
         return "An error occurred while processing your request. Please try again later."
