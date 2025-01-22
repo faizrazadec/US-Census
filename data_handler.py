@@ -27,9 +27,10 @@ def get_data(bq_manager, reg):
         # Execute the BigQuery query
         logger.info("Hitting BigQuery...")
         data = bq_manager.execute_query(reg)
-    except:
-        logger.error("SQL Query Problem.")
-    return data
+        return data
+    except Exception as e:
+        logger.error(f"SQL Query Problem: {e}")
+    return None
 
 def preprocess_data(data: pd.DataFrame):
     logger.info("Preporcessing Data...")
@@ -236,7 +237,7 @@ def short_data(data:pd.DataFrame, user_input, llm):
 
     # Call LLM to get a refined response based on the dataset and user query
     result = llm.invoke(system_prompt)
-    return result.content.strip()
+    return result.content.strip(), data_json
 
 def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10):
     """
@@ -513,7 +514,7 @@ def large_data(data:pd.DataFrame, user_input, llm, filename='data.json', rows=10
 
     # Call LLM to get a refined response based on the dataset and user query
     result = llm.invoke(system_prompt)
-    return result.content.strip()
+    return result.content.strip(), preprocessed_data
 
 def process_llm_response(response_text, data):
     logger.info("Function process_llm_response")
@@ -577,17 +578,17 @@ def data_handle(data, user_input, llm, filename='data.json', rows=10):
 
     if data_rows > 100:
         logger.info("Function called for large dataset")
-        response = large_data(data, user_input, llm, filename='data.json', rows=10)
+        response, preprocessed_data = large_data(data, user_input, llm, filename='data.json', rows=10)
 
-        response_text, chart = process_llm_response(response, data)
+        response_text, chart = process_llm_response(response, preprocessed_data)
 
         return data_rows, response_text, chart
     
     elif data_rows <= 100:
         logger.info("Function Called for short dataset")
-        response = short_data(data, user_input, llm)
+        response, data_json = short_data(data, user_input, llm)
 
-        response_text, chart = process_llm_response(response, data)
+        response_text, chart = process_llm_response(response, data_json)
 
         return data_rows, response_text, chart
 

@@ -980,7 +980,7 @@ def data_handler(data: pd.DataFrame, user_input, llm, filename='data.json', rows
 
 # Example usage
 if __name__ == "__main__":
-    user_query = "Show the relationship between commute time and income per capita for all counties."
+    user_query = "Find the top 5 counties with the highest percentage of self-employed individuals and show their average income."
     
     try:
         logger.info("Generating SQL query...")

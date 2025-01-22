@@ -41,8 +41,8 @@ def generate_initial_response(user_input, llm, vector_store, k):
 def trigger_fallback_logic(user_input, llm, context, human_message):
     """Trigger the fallback logic when the initial response cannot generate a SQL query."""
     try:
-        logger.info("Fallback Logic triggering...")
-        print("Triggering fallback logic")
+        logger.info("Fallback Logic triggered.")
+        # print("Triggering fallback logic")
 
         # Fallback system prompt
         SYSTEM_PROMPT_2 = f"""
@@ -86,10 +86,12 @@ def trigger_fallback_logic(user_input, llm, context, human_message):
         refined_response = llm.invoke([refined_system_message, human_message])
 
         # Debugging output
-        print("Refined Response generated:")
-        print(refined_response.content.strip())
+        logger.info("Improved Prompts Generated.")
+        # print("Refined Response generated:")
+        # print(refined_response.content.strip())
         
         # Return refined response (this means no further processing or BigQuery execution)
+        logger.critical("TERMINATED")
         return refined_response.content.strip()
 
     except Exception as e:
@@ -107,7 +109,7 @@ def get_response(user_input, llm, vector_store, k):
         if "I cannot generate a SQL query for this request based on the provided schema." in response:
             # If the response indicates fallback is needed, trigger fallback logic
             # print("Fallback triggered.")
-            logger.info("Fallback triggered...")
+            logger.info("Fallback triggered")
             # Retrieve schema context from ChromaDB again to pass to the fallback logic
             results = vector_store.similarity_search(user_input, k=k)
             flattened_context = [item.page_content for item in results]
