@@ -18,6 +18,8 @@ This system leverages **LangChain** and **Google's Gemini AI** to:
 
 - This dataset provides comprehensive demographic insights, enabling the bot to generate meaningful responses based on user queries related to population statistics, socio-economic trends, and other key demographic indicators.
 
+---
+
 ## ⚙️ Features
 
 - **Natural Language to SQL Translation**  
