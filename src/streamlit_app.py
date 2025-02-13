@@ -4,9 +4,9 @@ import asyncio
 import streamlit as st
 import pandas as pd
 from langchain_core.messages import HumanMessage
-from src.components import initialize_components
-from src.response_handler import generate_initial_response, trigger_fallback_logic
-from src.data_handler import refine_response, get_data, data_handle
+from components import initialize_components
+from response_handler import generate_initial_response, trigger_fallback_logic
+from data_handler import refine_response, get_data, data_handle
 
 async def main():
     # Configure the page
@@ -58,10 +58,6 @@ async def main():
         st.error(f"Failed to initialize components. Error: {e}")
         return
 
-    # Initialize progress bar
-    # if "progress" not in st.session_state:
-    #     st.session_state.progress = 0
-
     # User input
     user_query = st.text_area(
         "Enter your query:",
@@ -76,15 +72,12 @@ async def main():
             with st.container():
                 with st.spinner("Processing your query... Please wait."):
                     try:
-                        # progress_bar = st.progress(st.session_state.progress)
                         # Step 1: Get initial response from LLM
                         initial_response = generate_initial_response(
                             user_query, llm, vector_store, k=5
                         )
-                        # st.write("Initial Response from LLM:")
-                        # st.write(initial_response)
-                        # st.session_state.progress += 20 # Increase the progress by 10%
-                        # progress_bar.progress(st.session_state.progress) #update the progress bar
+                        st.write("Initial Response from LLM:")
+                        st.write(initial_response)
 
                         # Step 2: Check if initial response indicates fallback is needed
                         if (
@@ -96,41 +89,32 @@ async def main():
                             fallback_response = trigger_fallback_logic(
                                 user_query, llm, "", HumanMessage(content=user_query)
                             )
-                            # st.session_state.progress += 80 # Increase the progress by 10%
-                            # progress_bar.progress(st.session_state.progress)
-                            # st.write("Fallback Response:")
+                            st.write("Fallback Response:")
                             st.write(fallback_response)
                         else:
                             # Step 3: Refine the response to remove backticks if any
                             refined_response = refine_response(initial_response)
-                            # st.write("Refined Response:")
-                            # st.write(refined_response)
-                            # st.session_state.progress += 20 # Increase the progress by 10%
-                            # progress_bar.progress(st.session_state.progress)
+                            st.write("Refined Response:")
+                            st.write(refined_response)
 
                             # Step 4: Get data from BigQuery
                             data = get_data(bq_manager, refined_response)
-                            # st.write("Data retrieved from BigQuery:")
-                            # st.write(data)
-                            # st.session_state.progress += 20 # Increase the progress by 10%
-                            # progress_bar.progress(st.session_state.progress)
+                            st.write("Data retrieved from BigQuery:")
+                            st.write(data)
 
                             # Step 5: Handle and summarize the data
                             if isinstance(data, pd.DataFrame) and not data.empty:
-                                summary_text, chart = data_handle(
+                                data_rows, summary_text, chart = data_handle(
                                     data, user_query, llm, filename="data.json", rows=10
                                 )
-                                # st.write(data_rows)
+                                st.write(data_rows)
                                 if summary_text:
-                                    # st.write(preprocessed_data)
-
                                     st.write("Data Summary:")
                                     with st.expander(
                                         "Click to view the Data Summary", expanded=True
                                     ):
                                         st.write(summary_text)
-                                        # st.session_state.progress += 20 
-                                        # progress_bar.progress(st.session_state.progress)
+
                                     # Display the chart if one was generated
                                     if chart is not None:
                                         # Create columns for centered layout

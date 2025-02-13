@@ -9,46 +9,12 @@ transforming the data, and summarizing it based on user input.
 Additionally, the model is capable of generating Python code 
 (e.g., for visualizations), executing it safely, and returning 
 the resulting charts, if applicable.
-
-Functions:
-- `get_data`: Retrieves data from BigQuery using a provided query manager and query string.
-- `preprocess_data`: Cleans and preprocesses data by filling missing values and removing empty rows.
-- `save_json`: Saves data in JSON format to a specified file.
-- `get_head`: Returns the first few rows of the data in JSON format.
-- `short_data`: Processes smaller datasets by summarizing them
-based on user input and interacting with a language model.
-- `process_llm_response`: Processes the response from the LLM,
-extracting any embedded Python code, executing it to generate charts,
-and cleaning the response of file references (e.g., PNG, HTML).
-- `data_handle`: Decides whether to process a dataset as large or
-short and handles the response accordingly, including chart generation if needed.
-
-Dependencies:
-- pandas: Used for data manipulation.
-- altair: Used for chart generation, if specified by the Python code in the LLM response.
-- re: Used for regular expression matching and cleaning content.
-- logging: Used for logging the operations and any errors during processing.
-
-Logging:
-- The module logs key operations and any errors encountered during
-data processing, querying, and code execution. Errors related to
-code execution or chart generation are also logged with critical termination.
-
-Usage:
-- This model is designed to be used in data analysis applications
-where user queries need to be answered by summarizing datasets,
-generating visualizations, and cleaning up model responses.
-
-Example:
-    - Retrieve data from BigQuery, preprocess it, and generate a
-    summarized response based on a user's query, optionally
-    including a chart if the response includes Python code for visualizations.
 """
 
 import pandas as pd
 import altair as alt
 import regex as re
-from src.logger import setup_logger
+from logger import setup_logger
 
 # Get the configured logger
 logger = setup_logger()
@@ -61,16 +27,6 @@ def refine_response(response):
     3. Strips any other code blocks enclosed within triple backticks
     (``` ... ```) or single backticks (` ... `) from the response.
     4. Strips any leading or trailing whitespace from the response.
-
-    Args:
-        response (str): The response string to be refined.
-
-    Returns:
-        str: The refined response string with the specified modifications.
-
-    Logs:
-        - Logs an info message indicating the start of the refining process.
-        - Logs an error message if an exception occurs during the process.
     """
 
     try:
@@ -91,19 +47,6 @@ def refine_response(response):
 def get_data(bq_manager, reg):
     """
     Retrieves data from BigQuery using the specified query.
-
-    Args:
-        bq_manager: An instance of a class that handles BigQuery interactions.
-        reg (str): The BigQuery query to execute.
-
-    Returns:
-        pd.DataFrame: The data retrieved from BigQuery, or None if an error occurs.
-
-    Logs:
-        - Logs an info message indicating that a BigQuery query is being executed.
-        - Logs an error message if the query execution fails.
-        - Logs a critical message if the execution is terminated
-        due to an error.
     """
 
     try:
@@ -123,15 +66,6 @@ def preprocess_data(data: pd.DataFrame):
     1. Filling missing values with 0.
     2. Removing rows where all values are 0.
     3. Resetting the index after removal of rows.
-
-    Args:
-        data (pd.DataFrame): The input DataFrame to preprocess.
-
-    Returns:
-        pd.DataFrame: The preprocessed DataFrame.
-
-    Logs:
-        - Logs an info message indicating that the data preprocessing has started.
     """
 
     logger.info("Preporcessing Data...")
@@ -143,16 +77,6 @@ def preprocess_data(data: pd.DataFrame):
 def save_json(data, filename="data.json"):
     """
     Saves the given data to a JSON file.
-
-    Args:
-        data (pd.DataFrame or dict): The data to save.
-        filename (str, optional): The name of the JSON file to save. Defaults to "data.json".
-
-    Returns:
-        str: The name of the saved JSON file.
-
-    Logs:
-        - Logs an info message indicating that the data is being saved to JSON.
     """
 
     logger.info("Saving to Json...")
@@ -163,16 +87,6 @@ def save_json(data, filename="data.json"):
 def get_head(data, rows=10):
     """
     Fetches the first few rows of the given data and returns them as a JSON string.
-
-    Args:
-        data (pd.DataFrame): The DataFrame from which to fetch the first rows.
-        rows (int, optional): The number of rows to return. Defaults to 10.
-
-    Returns:
-        str: The first few rows of the data in JSON format.
-
-    Logs:
-        - Logs an info message indicating that the head of the data is being fetched.
     """
 
     logger.info("Fetching Head...")
@@ -182,25 +96,6 @@ def get_head(data, rows=10):
 def short_data(data: pd.DataFrame, user_input, llm):
     """
     Summarizes the provided dataset based on the user's query using a language model.
-
-    Args:
-        data (pd.DataFrame): The input dataset to be summarized.
-        user_input (str): The user's query that will guide the summarization.
-        llm (object): The language model used to generate the response
-        based on the dataset and user query.
-
-    Returns:
-        tuple: A tuple containing:
-            - A string with the summary of the dataset relevant to the user query.
-            - A JSON string representation of the preprocessed dataset.
-
-    Logs:
-        - Logs an info message indicating that the `short_data` function is being executed.
-
-    Example:
-        If the user's query asks for a list of students in a course, the
-        response will be a list of student names along with a brief,
-        informative sentence summarizing the result.
     """
 
     logger.info("Fucntion short_data.")
@@ -735,22 +630,6 @@ def large_data(data: pd.DataFrame, user_input, llm, filename="data.json", rows=1
 def process_llm_response(response_text, data):
     """
     Processes the response from the language model, extracting Python code, cleaning file references, and attempting to execute code for chart generation.
-
-    Args:
-        response_text (str): The response from the language model containing potential Python code and other content.
-        data (pd.DataFrame): The data to be used by the Python code, if any is included in the response.
-
-    Returns:
-        tuple: A tuple containing:
-            - A cleaned version of the response text, with file references and code removed.
-            - A chart object (if generated during code execution), otherwise None.
-
-    Logs:
-        - Logs the process of extracting and executing Python code.
-        - Logs any error during code execution or chart generation.
-
-    Example:
-        If the response includes Python code to generate a chart, the function executes the code and returns the chart along with a cleaned response text.
     """
 
     logger.info("Function process_llm_response")
@@ -819,26 +698,6 @@ def process_llm_response(response_text, data):
 def data_handle(data, user_input, llm, filename="data.json", rows=10):
     """
     Handles the dataset based on its size, processes it using either the large or short dataset function, and then processes the language model's response.
-
-    Args:
-        data (pd.DataFrame): The dataset to be processed.
-        user_input (str): The user's query to guide data summarization.
-        llm (object): The language model to summarize the dataset based on the user query.
-        filename (str, optional): The name of the file to save the data (default is "data.json").
-        rows (int, optional): The number of rows to display in the case of a small dataset (default is 10).
-
-    Returns:
-        tuple: A tuple containing:
-            - The number of rows in the dataset.
-            - The cleaned response text from the language model.
-            - A chart object if generated, otherwise None.
-
-    Logs:
-        - Logs the processing steps for both large and short datasets.
-        - Logs the response from the language model and chart generation process.
-
-    Example:
-        If the dataset has more than 100 rows, it is processed with the `large_data` function, otherwise, the `short_data` function is used. After processing, the cleaned response and potential chart are returned.
     """
 
     data_rows = len(data)

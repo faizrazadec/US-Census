@@ -7,8 +7,8 @@ query cannot be processed.
 """
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from src.system_prompt import SYSTEM_PROMPT
-from src.logger import setup_logger
+from system_prompt import SYSTEM_PROMPT
+from logger import setup_logger
 
 # Get the configured logger
 logger = setup_logger()

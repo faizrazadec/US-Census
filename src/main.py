@@ -1,3 +1,5 @@
+"""This module is just to test all the code in one module..."""
+
 import os
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -35,7 +37,7 @@ llm = ChatGoogleGenerativeAI(
 vector_store = Chroma(
     collection_name="Demographics_Schema_Collection",
     embedding_function=embeddings,
-    persist_directory="./Chroma_db"  # Path where Chroma DB is persisted
+    persist_directory="./langchain_chroma_db"  # Path where Chroma DB is persisted
 )
 
 def generate_initial_response(user_input, llm, vector_store, k):

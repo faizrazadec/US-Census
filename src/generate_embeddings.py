@@ -18,7 +18,7 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-schema_file = "demographics_Schema.txt"
+schema_file = "data/demographics_Schema.txt"
 
 embeddings = GoogleGenerativeAIEmbeddings(
     model="models/embedding-001",
@@ -66,7 +66,7 @@ if schema_embeddings:
     vector_store = Chroma(
         collection_name="Demographics_Schema_Collection",
         embedding_function=embeddings,
-        persist_directory="./Chroma_db",  # Where to save data locally, remove if not necessary
+        persist_directory="src/langchain_chroma_db",  # Where to save data locally, remove if not necessary
     )
 
     # Generate unique IDs for the documents
