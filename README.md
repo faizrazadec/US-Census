@@ -13,6 +13,13 @@ This system leverages **LangChain** and **Google's Gemini AI** to:
 
 ---
 
+## Dataset
+- The U.S. Census data utilized for this bot has been sourced from Kaggle. The dataset can be accessed via the link [US Census Data on Kaggle](https://www.kaggle.com/datasets/muonneutrino/us-census-demographic-data?select=acs2017_census_tract_data.csv)
+
+- This dataset provides comprehensive demographic insights, enabling the bot to generate meaningful responses based on user queries related to population statistics, socio-economic trends, and other key demographic indicators.
+
+---
+
 ## ⚙️ Features
 
 - **Natural Language to SQL Translation**  
@@ -31,8 +38,7 @@ This system leverages **LangChain** and **Google's Gemini AI** to:
 
 ## 🏗️ Tech Stack
 
-- **Frontend:** Streamlit  
-- **Backend:** Flask/FastAPI  
+- **WebApp:** Streamlit  
 - **AI Model:** LangChain + Google's Gemini  
 - **Database:** Google BigQuery  
 - **Infrastructure:** Docker, GCP  
@@ -50,7 +56,7 @@ git clone https://github.com/your-username/intelligent-data-insights.git
 cd intelligent-data-insights
 ```
 
-### 2. Clone the Repository
+### 2. Create a Virtual Environment
 ```
 python3 -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
@@ -76,8 +82,7 @@ streamlit run app.py
 
 # 📊 Usage Guide
 
-- Enter a natural language query, e.g.,
-- "Show me the total sales for Q1 2024."
+- Enter a natural language query, e.g., "Show me the total sales for Q1 2024."
 
 - Submit the query to generate an SQL statement.
 
