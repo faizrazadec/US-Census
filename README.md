@@ -89,3 +89,11 @@ streamlit run app.py
 - View results as an interactive table and chart.
 
 ![usage example](data/usage_example.png)
+
+---
+
+### ⭐ **Support This Project!**  
+If you found this useful, **please consider leaving a star ⭐ on GitHub**!  
+It motivates me to keep building more **open-source tools** 🚀  
+
+---
