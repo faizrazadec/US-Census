@@ -64,10 +64,9 @@ class BigQueryManager:
 
 #     # Example: Run a query to create or fetch data
 #     QUERY = """
-#     SELECT d.County, AVG(d.Income) AS AverageIncome
-#     FROM llm-testing-447813.us_census.demographics AS d
-#     ORDER BY d.SelfEmployed DESC
-#     LIMIT 5;"""
+#     SELECT d.State, SUM(d.Men) AS TotalMen
+#     FROM projects-451717.LLM.demographics AS d
+#     GROUP BY d.State;"""
 #     data = bq_manager.execute_query(QUERY)
 #     print(data)
 #     print(type(data))

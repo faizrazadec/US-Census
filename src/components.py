@@ -31,10 +31,10 @@ async def initialize_components():
     # Gemini API Key
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
-        raise ValueError("GEMINI_API_KEY is not set. Please check your .env file.")
+        raise ValueError("Error: GEMINI_API_KEY is not set. Please provide it")
 
     # Initialize LLM
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", api_key=gemini_api_key)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=gemini_api_key)
 
     # Initialize vector store
     embeddings = GoogleGenerativeAIEmbeddings(
@@ -46,6 +46,7 @@ async def initialize_components():
         collection_name="Demographics_Schema_Collection",
         embedding_function=embeddings,
         persist_directory="./langchain_chroma_db",
+        # persist_directory="/LLMHitBigQuery-USCensus/src/langchain_chroma_db" #for docker-image
     )
 
     return llm, vector_store, bq_manager

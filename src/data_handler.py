@@ -686,7 +686,7 @@ def process_llm_response(response_text, data):
             response_text = re.sub(pattern, "", response_text).strip()
 
         except Exception as e:
-            logger.error("Failed to Generate Chart.")
+            logger.error("Failed to Generate Chart. Error %s", str(e))
             # Append error message if code execution fails
             response_text += f"\nError generating visualization: {str(e)}"
             logger.critical("TERMINATED")

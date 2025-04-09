@@ -76,8 +76,8 @@ async def main():
                         initial_response = generate_initial_response(
                             user_query, llm, vector_store, k=5
                         )
-                        st.write("Initial Response from LLM:")
-                        st.write(initial_response)
+                        # st.write("Initial Response from LLM:")
+                        # st.write(initial_response)
 
                         # Step 2: Check if initial response indicates fallback is needed
                         if (
@@ -94,13 +94,13 @@ async def main():
                         else:
                             # Step 3: Refine the response to remove backticks if any
                             refined_response = refine_response(initial_response)
-                            st.write("Refined Response:")
-                            st.write(refined_response)
+                            # st.write("Refined Response:")
+                            # st.write(refined_response)
 
                             # Step 4: Get data from BigQuery
                             data = get_data(bq_manager, refined_response)
-                            st.write("Data retrieved from BigQuery:")
-                            st.write(data)
+                            # st.write("Data retrieved from BigQuery:")
+                            # st.write(data)
 
                             # Step 5: Handle and summarize the data
                             if isinstance(data, pd.DataFrame) and not data.empty:
